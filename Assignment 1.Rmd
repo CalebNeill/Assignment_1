@@ -24,64 +24,33 @@ site_names
 ```
 
 ```{r}
+#creating a list of data frames from each excel sheet
 df_list <- map(set_names(excel_sheets(data_file)),
-               read_excel, path = data_file
-)
+               read_excel, path = data_file)
 
+#note the change in sheet names when converted to data frames
 lapply(names(df_list), function(x)
        assign(x, df_list[[x]], envir = .GlobalEnv))
+```
 
+```{r}
+#edit the first sheet in data frame form to prevent issues with the comments within the excel document
 df_list[[1]] <- df_list[[1]][-c(1,2,3,4,5,6,7), ]
 df_list[[1]] <- row_to_names(df_list[[1]], row_number = 1)
 
+#add column to each data frame in list for "field site"
 df_list <- mapply(cbind, df_list, "Field Site" = site_names, SIMPLIFY = F)
 
 df_list
+```
 
+```{r}
+#combine each data frame into a single data frame
 df <- rbind(df_list[[1]],df_list[[2]],df_list[[3]],df_list[[4]],df_list[[5]])
 
 df
 ```
 
-```{r}
-#experimental code for sheet variable assignment
-data_file$Species <- factor(data_file$Species)
-
-path <- read_excel(data_file)
-
-fields <- path %>%
-  excel_sheets() %>%
-  set_names() %>%
-  map_df(~ read_excel(path = path, .id = sample_ids))
-print(fields)
-```
-
-
-```{r}
-#assinging
-paste(sample_ids[1], "_calls", sep = "")
-paste(sample_ids[2], "_calls", sep = "")
-paste(sample_ids[3], "_calls", sep = "")
-paste(sample_ids[4], "_calls", sep = "")
-paste(sample_ids[5], "_calls", sep = "")
-
-do.call("<-",list(paste(sample_ids[1], "_calls", sep = ""),
-                  read_xlsx(data_file, sheet=sample_ids[1], skip = 8)))
-do.call("<-",list(paste(sample_ids[2], "_calls", sep = ""),
-                  read_xlsx(data_file, sheet=sample_ids[2])))
-do.call("<-",list(paste(sample_ids[3], "_calls", sep = ""),
-                  read_xlsx(data_file, sheet=sample_ids[3])))
-do.call("<-",list(paste(sample_ids[4], "_calls", sep = ""),
-                  read_xlsx(data_file, sheet=sample_ids[4])))
-do.call("<-",list(paste(sample_ids[5], "_calls", sep = ""),
-                  read_xlsx(data_file, sheet=sample_ids[5])))
-
-glimpse(`Field Site 1_calls`)
-```
-
-```{r}
-add_column
-```
 
 
 
