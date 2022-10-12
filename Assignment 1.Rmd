@@ -7,6 +7,8 @@ output: html_notebook
 #ensuring all necessary libraries are set before running the code
 library(tidyverse)
 library(readxl)
+library(tidyverse)
+library(janitor)
 ```
 
 ```{r}
@@ -17,9 +19,43 @@ read_xlsx(data_file, skip = 8)
 
 ```{r}
 #creating the id names for the different sheets
-sample_ids <- excel_sheets(data_file)
-sample_ids
+site_names <- excel_sheets(data_file)
+site_names
 ```
+
+```{r}
+df_list <- map(set_names(excel_sheets(data_file)),
+               read_excel, path = data_file
+)
+
+lapply(names(df_list), function(x)
+       assign(x, df_list[[x]], envir = .GlobalEnv))
+
+df_list[[1]] <- df_list[[1]][-c(1,2,3,4,5,6,7), ]
+df_list[[1]] <- row_to_names(df_list[[1]], row_number = 1)
+
+df_list <- mapply(cbind, df_list, "Field Site" = site_names, SIMPLIFY = F)
+
+df_list
+
+df <- rbind(df_list[[1]],df_list[[2]],df_list[[3]],df_list[[4]],df_list[[5]])
+
+df
+```
+
+```{r}
+#experimental code for sheet variable assignment
+data_file$Species <- factor(data_file$Species)
+
+path <- read_excel(data_file)
+
+fields <- path %>%
+  excel_sheets() %>%
+  set_names() %>%
+  map_df(~ read_excel(path = path, .id = sample_ids))
+print(fields)
+```
+
 
 ```{r}
 #assinging
@@ -44,7 +80,7 @@ glimpse(`Field Site 1_calls`)
 ```
 
 ```{r}
-
+add_column
 ```
 
 
