@@ -3,3 +3,57 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+```{r}
+#ensuring all necessary libraries are set before running the code
+library(tidyverse)
+library(readxl)
+```
+
+```{r}
+#readxl commands necessary for multi-sheet excel document
+data_file <- "BIOL3207_Assignment1_DataFile.xlsx"
+read_xlsx(data_file, skip = 8)
+```
+
+```{r}
+#creating the id names for the different sheets
+sample_ids <- excel_sheets(data_file)
+sample_ids
+```
+
+```{r}
+#assinging
+paste(sample_ids[1], "_calls", sep = "")
+paste(sample_ids[2], "_calls", sep = "")
+paste(sample_ids[3], "_calls", sep = "")
+paste(sample_ids[4], "_calls", sep = "")
+paste(sample_ids[5], "_calls", sep = "")
+
+do.call("<-",list(paste(sample_ids[1], "_calls", sep = ""),
+                  read_xlsx(data_file, sheet=sample_ids[1], skip = 8)))
+do.call("<-",list(paste(sample_ids[2], "_calls", sep = ""),
+                  read_xlsx(data_file, sheet=sample_ids[2])))
+do.call("<-",list(paste(sample_ids[3], "_calls", sep = ""),
+                  read_xlsx(data_file, sheet=sample_ids[3])))
+do.call("<-",list(paste(sample_ids[4], "_calls", sep = ""),
+                  read_xlsx(data_file, sheet=sample_ids[4])))
+do.call("<-",list(paste(sample_ids[5], "_calls", sep = ""),
+                  read_xlsx(data_file, sheet=sample_ids[5])))
+
+glimpse(`Field Site 1_calls`)
+```
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
