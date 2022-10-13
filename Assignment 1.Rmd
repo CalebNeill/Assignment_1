@@ -39,7 +39,7 @@ df_list[[1]] <- df_list[[1]][-c(1,2,3,4,5,6,7), ]
 df_list[[1]] <- row_to_names(df_list[[1]], row_number = 1)
 
 #add column to each data frame in list for "field site"
-df_list <- mapply(cbind, df_list, "Field Site" = site_names, SIMPLIFY = F)
+df_list <- mapply(cbind, df_list, "Field_Site" = site_names, SIMPLIFY = F)
 
 df_list
 ```
@@ -50,6 +50,54 @@ df <- rbind(df_list[[1]],df_list[[2]],df_list[[3]],df_list[[4]],df_list[[5]])
 
 df
 ```
+
+```{r}
+#checking for na values in the df
+na_point <- is.na(df)
+colSums(na_point)
+colnames(df)[colSums(is.na(df)) > 0]
+```
+
+```{r}
+#check spelling of each species value
+df %>% filter(!(is.na(Species))) %>% tabyl(Species, Field_Site)
+```
+
+```{r}
+#replace spelling of incorrect species
+which(df == "A Mendacium")
+df[df == "A Mendacium"] <- "A mendacium"
+```
+
+```{r}
+df %>% filter(!(is.na(Species))) %>% tabyl(Species, Field_Site)
+```
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
