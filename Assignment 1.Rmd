@@ -9,6 +9,8 @@ library(tidyverse)
 library(readxl)
 library(tidyverse)
 library(janitor)
+library(ggplot2)
+library(GGally)
 ```
 
 ```{r}
@@ -74,21 +76,44 @@ df %>% filter(!(is.na(Species))) %>% tabyl(Species, Field_Site)
 ```
 
 ```{r}
-
+#failed graph
+df %>% filter(!(is.na(Species))) %>% filter(!(is.na(`Range (square km)`))) %>% ggplot(mapping = aes(x = Field_Site, y = `Range (square km)`, colour = Field_Site)) +
+  geom_boxplot() +
+  geom_smooth() +
+  geom_jitter(width = 0.2, height = 0)
 ```
 
+```{r}
+#no correlation?
+df %>% filter(!(is.na(Species))) %>% filter(!(is.na(`Range (square km)`))) %>% ggplot(mapping = aes(x = `Weight (kg)`, y = `Range (square km)`, colour = Field_Site)) + geom_point() + geom_smooth()
+```
 
+```{r}
+df2 <- na.omit(df)
 
+df2 <- mutate(df2, Species = case_when(
+  df2$Species == "A fictus" ~ 1,
+  df2$Species == "A mendacium" ~ 2))
 
+df2 <- mutate(df2, Field_Site = case_when(
+  df2$Field_Site == "Field Site 1" ~ 1,
+  df2$Field_Site == "Field Site 2" ~ 2,
+  df2$Field_Site == "Field Site 3" ~ 3,
+  df2$Field_Site == "Field Site 4" ~ 4,
+  df2$Field_Site == "Field Site 5" ~ 5,))
 
+df2
+```
 
+```{r}
+df_int[] <- lapply(df_int, function(x) as.numeric(as.character(x)))
+df_int
+sapply(df_int, class)
+```
 
-
-
-
-
-
-
+```{r}
+cor(df_int)
+```
 
 
 
