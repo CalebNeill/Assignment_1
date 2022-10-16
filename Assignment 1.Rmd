@@ -76,6 +76,10 @@ df %>% filter(!(is.na(Species))) %>% tabyl(Species, Field_Site)
 ```
 
 ```{r}
+
+```
+
+```{r}
 #failed graph
 df %>% filter(!(is.na(Species))) %>% filter(!(is.na(`Range (square km)`))) %>% ggplot(mapping = aes(x = Field_Site, y = `Range (square km)`, colour = Field_Site)) +
   geom_boxplot() +
@@ -112,11 +116,15 @@ sapply(df_int, class)
 ```
 
 ```{r}
-cor(df_int)
+cor(df_int[, c("Range (square km)", "Weight (kg)", "Height (cm)", "Species", "Year")])
 ```
 
-
-
+```{r}
+df_int %>%
+  lapply(function(Species) as.character(Species)) %>%
+  select(`Range (square km)`, `Weight (kg)`, `Height (cm)`, Species) %>%
+  ggpairs(aes(colour = Species, alpha = 0.4))
+```
 
 
 
