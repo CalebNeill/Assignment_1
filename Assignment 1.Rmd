@@ -12,6 +12,7 @@ library(janitor)
 library(ggplot2)
 library(GGally)
 ```
+## Data Wrangling
 
 ```{r}
 #readxl commands necessary for multi-sheet excel document
@@ -76,12 +77,14 @@ df %>% filter(!(is.na(Species))) %>% tabyl(Species, Field_Site)
 ```
 
 ```{r}
-
+#change the names of the columns to better write code
+colnames(df) <- c("range", "weight", "height", "species", "year", "field_site")
+df
 ```
 
 ```{r}
 #failed graph
-df %>% filter(!(is.na(Species))) %>% filter(!(is.na(`Range (square km)`))) %>% ggplot(mapping = aes(x = Field_Site, y = `Range (square km)`, colour = Field_Site)) +
+df %>% filter(!(is.na(species))) %>% filter(!(is.na(`Range (square km)`))) %>% ggplot(mapping = aes(x = Field_Site, y = `Range (square km)`, colour = Field_Site)) +
   geom_boxplot() +
   geom_smooth() +
   geom_jitter(width = 0.2, height = 0)
@@ -95,36 +98,93 @@ df %>% filter(!(is.na(Species))) %>% filter(!(is.na(`Range (square km)`))) %>% g
 ```{r}
 df2 <- na.omit(df)
 
-df2 <- mutate(df2, Species = case_when(
-  df2$Species == "A fictus" ~ 1,
-  df2$Species == "A mendacium" ~ 2))
+df2 <- mutate(df2, species = case_when(
+  df2$species == "A fictus" ~ 1,
+  df2$species == "A mendacium" ~ 2))
 
-df2 <- mutate(df2, Field_Site = case_when(
-  df2$Field_Site == "Field Site 1" ~ 1,
-  df2$Field_Site == "Field Site 2" ~ 2,
-  df2$Field_Site == "Field Site 3" ~ 3,
-  df2$Field_Site == "Field Site 4" ~ 4,
-  df2$Field_Site == "Field Site 5" ~ 5,))
+df2 <- mutate(df2, field_site = case_when(
+  df2$field_site == "Field Site 1" ~ 1,
+  df2$field_site == "Field Site 2" ~ 2,
+  df2$field_site == "Field Site 3" ~ 3,
+  df2$field_site == "Field Site 4" ~ 4,
+  df2$field_site == "Field Site 5" ~ 5,))
 
 df2
 ```
 
 ```{r}
+#creating another dataframe that has each data value as an integer
+df_int <- df2
 df_int[] <- lapply(df_int, function(x) as.numeric(as.character(x)))
-df_int
 sapply(df_int, class)
 ```
 
 ```{r}
-cor(df_int[, c("Range (square km)", "Weight (kg)", "Height (cm)", "Species", "Year")])
+df_tib <- as_tibble(df2)
+df_tib
+```
+
+## Data Analysis
+
+```{r}
+cor(df_int[, c("range", "weight", "height", "species", "year")])
 ```
 
 ```{r}
-df_int %>%
-  lapply(function(Species) as.character(Species)) %>%
-  select(`Range (square km)`, `Weight (kg)`, `Height (cm)`, Species) %>%
-  ggpairs(aes(colour = Species, alpha = 0.4))
+df_tib %>% ggplot(mapping = aes(x = field_site, y = weight, colour = field_site)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, height = 0)
 ```
+
+```{r}
+ttest_RFbS <- df_int %>%
+  group_by(species) %>%
+  t_test(range ~ field_site) %>%
+  adjust_pvalue(method = "bonferroni") %>%
+  add_significance()
+ttest_RFbS
+
+ttest_WFbS <- df_int %>%
+  group_by(species) %>%
+  t_test(weight ~ field_site) %>%
+  adjust_pvalue(method = "bonferroni") %>%
+  add_significance()
+ttest_WFbS
+
+ttest_HFbS <- df_int %>%
+  group_by(species) %>%
+  t_test(height ~ field_site) %>%
+  adjust_pvalue(method = "bonferroni") %>%
+  add_significance()
+ttest_HFbS
+```
+
+```{r}
+ttest_RSbF <- df_int %>%
+  group_by(field_site) %>%
+  t_test(range ~ species) %>%
+  adjust_pvalue(method = "bonferroni") %>%
+  add_significance()
+ttest_RSbF
+
+ttest_WSbF <- df_int %>%
+  group_by(field_site) %>%
+  t_test(weight ~ species) %>%
+  adjust_pvalue(method = "bonferroni") %>%
+  add_significance()
+ttest_WSbF
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
