@@ -60,6 +60,12 @@ df
 ```
 
 ```{r}
+unique(df$year)
+
+df[df == "2217"] <- "2017"
+```
+
+```{r}
 #checking for na values in the df
 na_point <- is.na(df)
 colSums(na_point)
@@ -184,12 +190,21 @@ ttest_HSbF
 ## Visualise Data
 
 ```{r}
+#graph displaying the differences in weight between each field site
 df_int %>% ggplot(mapping = aes(x = field_site, y = weight, colour = field_site, group = field_site)) +
   geom_boxplot() +
   geom_jitter(width = 0.2, height = 0)
+
+df_int %>% ggplot(mapping = aes(x = species, y = weight, colour = species, group = species)) +
+  geom_boxplot() +
+  facet_wrap(~ field_site) +
+  geom_jitter(width = 0.2, height = 0) +
+  scale_x_continuous(breaks = seq(1,2, by=1), labels = species_names) +
+  scale_colour_continuous(breaks = c(1,2), labels = species_names)
 ```
 
 ```{r}
+#graphs displaying the differences in weight between species and field sites in relation to each variable separately
 df_int %>% ggplot(mapping = aes(x = species, y = range, colour = species, group = species)) +
   geom_boxplot() +
   geom_jitter(width = 0.2, height = 0) +
@@ -212,6 +227,25 @@ df_int %>% ggplot(mapping = aes(x = field_site, y = range, colour = field_site, 
   facet_grid(~ species, labeller = species_labeller) +
   geom_jitter(width = 0.2, height = 0)
 ```
+
+```{r}
+#testing correlation between range and weight and species differences
+df_int %>% ggplot(mapping = aes(x = weight, y = range, colour = species, group = species)) +
+  geom_point() +
+  geom_smooth(method=lm) +
+  scale_colour_continuous(breaks = c(1,2), labels = species_names)
+
+df_int %>% ggplot(mapping = aes(x = weight, y = range, colour = species)) +
+  geom_point() +
+  geom_smooth(method=lm) +
+  facet_grid(~ species) +
+  scale_colour_continuous(breaks = c(1,2), labels = species_names)
+```
+
+
+
+
+
 
 
 
