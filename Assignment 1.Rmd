@@ -11,6 +11,7 @@ library(tidyverse)
 library(janitor)
 library(ggplot2)
 library(GGally)
+library(rstatix)
 ```
 ## Data Wrangling
 
@@ -24,7 +25,11 @@ read_xlsx(data_file, skip = 8)
 #creating the id names for the different sheets
 site_names <- excel_sheets(data_file)
 site_names
+
+species_names <- c("A_fictus", "A_mendacium")
 ```
+
+
 
 ```{r}
 #creating a list of data frames from each excel sheet
@@ -131,12 +136,6 @@ cor(df_int[, c("range", "weight", "height", "species", "year")])
 ```
 
 ```{r}
-df_tib %>% ggplot(mapping = aes(x = field_site, y = weight, colour = field_site)) +
-  geom_boxplot() +
-  geom_jitter(width = 0.2, height = 0)
-```
-
-```{r}
 ttest_RFbS <- df_int %>%
   group_by(species) %>%
   t_test(range ~ field_site) %>%
@@ -173,12 +172,46 @@ ttest_WSbF <- df_int %>%
   adjust_pvalue(method = "bonferroni") %>%
   add_significance()
 ttest_WSbF
+
+ttest_HSbF <- df_int %>%
+  group_by(field_site) %>%
+  t_test(height ~ species) %>%
+  adjust_pvalue(method = "bonferroni") %>%
+  add_significance()
+ttest_HSbF
 ```
 
+## Visualise Data
 
+```{r}
+df_int %>% ggplot(mapping = aes(x = field_site, y = weight, colour = field_site, group = field_site)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, height = 0)
+```
 
+```{r}
+df_int %>% ggplot(mapping = aes(x = species, y = range, colour = species, group = species)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.2, height = 0) +
+  scale_x_continuous(breaks = seq(1,2, by=1), labels = species_names) +
+  scale_colour_continuous(breaks = c(1,2), labels = species_names)
 
+df_int %>% ggplot(mapping = aes(x = species, y = range, colour = species, group = species)) +
+  geom_boxplot() +
+  facet_wrap(~ field_site) +
+  geom_jitter(width = 0.2, height = 0) +
+  scale_x_continuous(breaks = seq(1,2, by=1), labels = species_names) +
+  scale_colour_continuous(breaks = c(1,2), labels = species_names)
 
+species_labeller <- function(variable, value){
+  return(species_names[value])
+}
+
+df_int %>% ggplot(mapping = aes(x = field_site, y = range, colour = field_site, group = field_site)) +
+  geom_boxplot() +
+  facet_grid(~ species, labeller = species_labeller) +
+  geom_jitter(width = 0.2, height = 0)
+```
 
 
 
