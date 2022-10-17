@@ -13,6 +13,7 @@ library(ggplot2)
 library(GGally)
 library(rstatix)
 ```
+
 ## Data Wrangling
 
 ```{r}
@@ -26,6 +27,7 @@ read_xlsx(data_file, skip = 8)
 site_names <- excel_sheets(data_file)
 site_names
 
+#species names for easier coding in future
 species_names <- c("A_fictus", "A_mendacium")
 ```
 
@@ -60,6 +62,7 @@ df
 ```
 
 ```{r}
+#error in data entry needs to be fixed to prevent errors
 unique(df$year)
 
 df[df == "2217"] <- "2017"
@@ -93,22 +96,12 @@ colnames(df) <- c("range", "weight", "height", "species", "year", "field_site")
 df
 ```
 
-```{r}
-#failed graph
-df %>% filter(!(is.na(species))) %>% filter(!(is.na(`Range (square km)`))) %>% ggplot(mapping = aes(x = Field_Site, y = `Range (square km)`, colour = Field_Site)) +
-  geom_boxplot() +
-  geom_smooth() +
-  geom_jitter(width = 0.2, height = 0)
-```
 
 ```{r}
-#no correlation?
-df %>% filter(!(is.na(Species))) %>% filter(!(is.na(`Range (square km)`))) %>% ggplot(mapping = aes(x = `Weight (kg)`, y = `Range (square km)`, colour = Field_Site)) + geom_point() + geom_smooth()
-```
-
-```{r}
+#remove na values from data frame
 df2 <- na.omit(df)
 
+#change species and field site names to values for easier graphing and analysis
 df2 <- mutate(df2, species = case_when(
   df2$species == "A fictus" ~ 1,
   df2$species == "A mendacium" ~ 2))
@@ -131,17 +124,28 @@ sapply(df_int, class)
 ```
 
 ```{r}
+#creation of tibble from data frame
 df_tib <- as_tibble(df2)
 df_tib
+```
+
+```{r}
+write.csv(df_tib, "u7126105_BIOL3207_Assignment1_DataFile.xlsx")
 ```
 
 ## Data Analysis
 
 ```{r}
+#correlations between different variables to detect signifcance
 cor(df_int[, c("range", "weight", "height", "species", "year")])
 ```
 
+From the cor test, there is some significant positive correlation between species and range, and some possible correlation between weight and range. This will need further analysis to determine significance.
+
 ```{r}
+#t tests to test for significance between the variables, field site and species
+#naming code: RFbS = Range ~ Field site by species
+
 ttest_RFbS <- df_int %>%
   group_by(species) %>%
   t_test(range ~ field_site) %>%
@@ -163,6 +167,8 @@ ttest_HFbS <- df_int %>%
   add_significance()
 ttest_HFbS
 ```
+
+The results of the t tests determine no significance for height of species by field site, and strong signficance for weight of species between each field site. There is strong significant differences in range between field sites for A mendacium, but no significance for A fictus, requiring t tests for the variables and species by field site.
 
 ```{r}
 ttest_RSbF <- df_int %>%
@@ -187,6 +193,8 @@ ttest_HSbF <- df_int %>%
 ttest_HSbF
 ```
 
+Results shows no significant differences between the height and weight of each species for each field site, but a strong significant difference between the species' range for each field site apart from field site 1.
+
 ## Visualise Data
 
 ```{r}
@@ -202,9 +210,10 @@ df_int %>% ggplot(mapping = aes(x = species, y = weight, colour = species, group
   scale_x_continuous(breaks = seq(1,2, by=1), labels = species_names) +
   scale_colour_continuous(breaks = c(1,2), labels = species_names)
 ```
+The signifant differences between the weight of both species over the five field sites is displayed over the two graphs. the second graph demonstrates the lack of significant difference in species weight within the field site, conveying the differences are in the field site alone.
 
 ```{r}
-#graphs displaying the differences in weight between species and field sites in relation to each variable separately
+#graphs displaying the differences in range between species and field sites in relation to each variable separately
 df_int %>% ggplot(mapping = aes(x = species, y = range, colour = species, group = species)) +
   geom_boxplot() +
   geom_jitter(width = 0.2, height = 0) +
@@ -227,6 +236,7 @@ df_int %>% ggplot(mapping = aes(x = field_site, y = range, colour = field_site, 
   facet_grid(~ species, labeller = species_labeller) +
   geom_jitter(width = 0.2, height = 0)
 ```
+The results convey the significant differences in range between the field sites for A mendacium, but not for A fictus. The three graphs demonstrate the overall differences in range over all five sites between the species, and comparing each field site's differences in range.
 
 ```{r}
 #testing correlation between range and weight and species differences
@@ -238,35 +248,12 @@ df_int %>% ggplot(mapping = aes(x = weight, y = range, colour = species, group =
 df_int %>% ggplot(mapping = aes(x = weight, y = range, colour = species)) +
   geom_point() +
   geom_smooth(method=lm) +
-  facet_grid(~ species) +
+  facet_grid(~ species, labeller = species_labeller) +
   scale_colour_continuous(breaks = c(1,2), labels = species_names)
 ```
+Both graphs demonstrate some positive correlation between weight and range for A mendacium, as displayed by the line of best fit provided in the scatter graph, but no significant correlation for A fictus. Overall there is no significant correlation that could provide useful analysis in the study.
 
+## Conclusion
+The overall results of the study convey differences in weight of both species over the five field site. This could be due to increased resources between each field site, allowing for weight gain for the organisms feeding in the area, since the height of the species is consistent over the field sites so, the increase in weight cannot be due to increase in vertical size.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+The results show an increase in range for the A mendacium species over the five field sites, but no difference in range for A fictus. Since the weight of each species increases in the same manner of weight increasing over the field sites, it could be concluded that the field sites have a increased amount of resources for each species, which either A mendacium's resource pool is spread over a larger area requiring more roaming, or the species itself is more mobile than A fictus and the field sits with less resources have a higher density of resources that force A mendacium to remain in a smaller roaming area.
